@@ -49,20 +49,16 @@ const AISidebar = forwardRef<AISidebarRef, AISidebarProps>(
 
   const callLangFlow = async (message: string): Promise<string> => {
     try {
-      const langflowUrl = "http://localhost:7860/api/v1/run/222835eb-0e8f-45db-91db-005693d004cb?stream=false";
-      message = message + "User ID: " + userId;
-      
-      if (!langflowUrl) {
-        throw new Error('NEXT_PUBLIC_LANGFLOW_URL is not configured');
-      }
-
-      const response = await fetch(langflowUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': `sk-__Xna4vc2lqEIqUXujquJAE-3wm34kpSUneYAkuNiK0`,
-          'Accept': 'application/json',
-        },
+      const apiKey = process.env.NEXT_PUBLIC_LANGFLOW_API_KEY;
+    const langflowUrl = process.env.NEXT_PUBLIC_LANGFLOW_URL;
+    message = message + ". User ID: " + user?.id;
+    const response = await fetch(langflowUrl || 'http://localhost:7860/api/v1/run/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': `${apiKey}`,
+        'Accept': 'application/json',
+      } ,
         body: JSON.stringify({
           session_id: sessionId || `session-${Date.now()}`,
           input_type: "chat",
