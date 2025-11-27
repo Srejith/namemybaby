@@ -33,16 +33,8 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <div className="bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/20">
-              <p className="text-gray-700 leading-relaxed">
-                If you're an immigrant parent, you know the drill. You pick a gorgeous, meaningful name from your language, 
-                and then... you watch the cashier/teacher/doctor look at it, panic, and say something that sounds like an 
-                <span className="font-semibold text-pink-600"> angry sneeze.</span>
-              </p>
-            </div>
-
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">How It Works</h2>
+              <h2 className="text-2xl font-bold text-gray-900">How it works</h2>
               
               <div className="space-y-4">
                 <div className="flex gap-4 items-start">
@@ -50,9 +42,9 @@ export default function LoginPage() {
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">Ideas generator</h3>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">No More Baby Books!</h3>
                     <p className="text-gray-600">
-                      
+                      Instantly cross-references your prefernces like heritage, current location to generate names that sound perfect anywhere in the world. 
                     </p>
                   </div>
                 </div>
@@ -62,10 +54,9 @@ export default function LoginPage() {
                     <TrendingUp className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">Name Machine</h3>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">The Accent Defense System</h3>
                     <p className="text-gray-600">
-                      Get a percentage that tells you: "How close did they come to not totally butchering your kid's name?" 
-                      We're saving your kid from a lifetime of correcting people.
+                    Hear the name spoken in every weird accent of your current country to select the one least likely to be butchered by locals. We are literally saving your kid from a lifetime of correcting people at Starbucks.
                     </p>
                   </div>
                 </div>
@@ -75,10 +66,9 @@ export default function LoginPage() {
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">Pronounce it correctly</h3>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">The Meaningful Deep Dive</h3>
                     <p className="text-gray-600">
-                      Whip up a poll, share with friends, and let them vote. Or ignore everyone and pick the name you secretly 
-                      loved all along. We're not your boss.
+                    Get a witty Etymology Report to win arguments with your in-laws about the name's true meaning and historical awesomeness. 
                     </p>
                   </div>
                 </div>
@@ -151,13 +141,6 @@ export default function LoginPage() {
                 {/* Footer */}
                 <p className="text-center text-sm text-gray-500">
                   Sign in to save and access your baby name suggestions across all your devices.
-                </p>
-              </div>
-
-              {/* Decorative Elements */}
-              <div className="mt-8 text-center">
-                <p className="text-gray-500 italic">
-                  What name have you been thinking about that the locals just cannot handle?
                 </p>
               </div>
             </div>

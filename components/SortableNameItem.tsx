@@ -28,7 +28,8 @@ export default function SortableNameItem({ item, bucketId, onDelete, onClick, on
     transition,
   };
 
-  const showAIButton = bucketId === 'shortlist' || bucketId === 'maybe';
+  // Show report and voice buttons for all buckets (including manually added names)
+  const showAIButton = true;
 
   // Determine gender-based styling - matching Voice Analysis colors
   const getGenderStyles = () => {

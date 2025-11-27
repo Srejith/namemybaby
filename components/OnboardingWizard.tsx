@@ -342,7 +342,7 @@ export default function OnboardingWizard({
                   type="text"
                   value={preferences.tone || ''}
                   onChange={(e) => updatePreference('tone', e.target.value)}
-                  placeholder="e.g., Modern, Classic, Traditional, Unique"
+                  placeholder="e.g., Easy to pronounce, Modern, Classic, Traditional, Unique"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-900 transition-all"
                 />
               </div>

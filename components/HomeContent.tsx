@@ -102,6 +102,8 @@ export default function HomeContent({
             names={names.rejected}
             onAddName={onAddName}
             onDeleteName={onDeleteName}
+            onClick={onRequestReport}
+            onVoiceClick={onVoiceClick}
             color="red"
           />
         </div>
