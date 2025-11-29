@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FileText, Volume2 } from 'lucide-react';
@@ -11,9 +12,21 @@ interface SortableNameItemProps {
   onDelete: () => void;
   onClick?: (name: string) => void;
   onVoiceClick?: (name: string) => void;
+  onMoveClick?: (item: NameItem) => void;
 }
 
-export default function SortableNameItem({ item, bucketId, onDelete, onClick, onVoiceClick }: SortableNameItemProps) {
+export default function SortableNameItem({ item, bucketId, onDelete, onClick, onVoiceClick, onMoveClick }: SortableNameItemProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const {
     attributes, 
     listeners,
@@ -38,21 +51,30 @@ export default function SortableNameItem({ item, bucketId, onDelete, onClick, on
     } else if (item.gender === 'Girl') {
       return 'bg-pink-400 border-pink-400 hover:bg-pink-500';
     }
-    return 'bg-white border-gray-200 hover:bg-gray-50';
+    // Manually added names (no gender) - grey background
+    return 'bg-gray-200 border-gray-300 hover:bg-gray-300';
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
+      {...(isMobile ? {} : attributes)}
       className={`${getGenderStyles()} rounded-lg p-3 border transition-all flex items-center justify-between group shadow-sm hover:shadow-md ${
         isDragging ? 'opacity-50 scale-95' : ''
       }`}
     >
       <div 
-        {...listeners}
-        className={`flex-1 cursor-grab active:cursor-grabbing ${item.gender ? 'text-white' : 'text-gray-900'}`}
+        {...(isMobile ? {} : listeners)}
+        className={`flex-1 ${!isMobile ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${item.gender ? 'text-white' : 'text-gray-900'}`}
+        onClick={(e) => {
+          // On mobile (touch devices), show move options instead of drag
+          if (isMobile && onMoveClick) {
+            e.stopPropagation();
+            e.preventDefault();
+            onMoveClick(item);
+          }
+        }}
       >
         <div className="font-medium">{item.name}</div>
         {item.inspiration && (

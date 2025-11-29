@@ -267,7 +267,7 @@ export default function OnboardingWizard({
             </div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <div className="flex-1 flex flex-col space-y-6">
               <div>
                 <label htmlFor="ideaPreferences" className="block text-base font-bold text-gray-900 mb-3">
@@ -331,7 +331,7 @@ export default function OnboardingWizard({
             </div>
           )}
 
-          {currentStep === 4 && (
+          {currentStep === 3 && (
             <div className="flex-1 flex flex-col justify-center space-y-6">
               <div>
                 <label htmlFor="tone" className="block text-sm font-semibold text-gray-700 mb-2">

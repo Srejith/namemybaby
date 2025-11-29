@@ -15,6 +15,7 @@ interface NameBucketProps {
   onDeleteName: (bucket: string, id: string) => void;
   onClick?: (name: string) => void;
   onVoiceClick?: (name: string) => void;
+  onMoveClick?: (item: NameItem) => void;
   color: 'green' | 'yellow' | 'red';
 }
 
@@ -53,6 +54,7 @@ export default function NameBucket({
   onDeleteName,
   onClick,
   onVoiceClick,
+  onMoveClick,
   color,
 }: NameBucketProps) {
   const [isAdding, setIsAdding] = useState(false);
@@ -78,7 +80,7 @@ export default function NameBucket({
       ref={setNodeRef}
       className={`rounded-xl border ${colors.border} ${colors.bg} ${
         isOver ? 'ring-2 ring-blue-400 ring-offset-2 shadow-lg' : 'shadow-md'
-      } flex flex-col h-full overflow-hidden backdrop-blur-sm transition-all duration-200`}
+      } flex flex-col h-full min-h-[300px] md:min-h-0 overflow-hidden backdrop-blur-sm transition-all duration-200`}
     >
       {/* Modern Header */}
       <div className={`${colors.header} px-5 py-4 flex items-center justify-between backdrop-blur-sm`}>
@@ -89,7 +91,7 @@ export default function NameBucket({
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-2 md:space-y-3">
         <SortableContext items={names.map((n) => n.id)} strategy={verticalListSortingStrategy}>
           {names.map((item) => (
             <SortableNameItem
@@ -99,6 +101,7 @@ export default function NameBucket({
               onDelete={() => onDeleteName(bucketId, item.id)}
               onClick={onClick}
               onVoiceClick={onVoiceClick}
+              onMoveClick={onMoveClick}
             />
           ))}
         </SortableContext>
@@ -106,13 +109,14 @@ export default function NameBucket({
         {names.length === 0 && (
           <div className={`text-center ${colors.emptyState} py-12 text-sm font-medium`}>
             <p className="mb-1">No names yet</p>
-            <p className="text-xs font-normal">Drag names here or add manually</p>
+            <p className="text-xs font-normal hidden md:block">Drag names here or add manually</p>
+            <p className="text-xs font-normal md:hidden">Tap names to move or add manually</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-5 border-t border-gray-200/50 bg-white/30 backdrop-blur-sm">
+      <div className="p-4 md:p-5 border-t border-gray-200/50 bg-white/30 backdrop-blur-sm">
         {isAdding ? (
           <form onSubmit={handleSubmit} className="space-y-2">
             <input

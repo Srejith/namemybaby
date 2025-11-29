@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Search, CheckCircle2, Play, Pause } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { checkAudioFileExists, getAudioFile, saveAudioFile } from '@/lib/voice-audio';
+import { saveAudioFile } from '@/lib/voice-audio';
 
 interface Voice {
   voice_id: string;
@@ -95,33 +95,24 @@ export default function VoiceSelectionSidebar({ name, onClose }: VoiceSelectionS
       let audioBlob: Blob | null = null;
       let audioUrl: string | null = null;
 
-      // Check if audio exists in DB
-      const existingAudio = await getAudioFile(name, selectedVoice.voice_id, user.id);
+      // Always generate via Eleven Labs
+      const response = await fetch('/api/elevenlabs/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voice_id: selectedVoice.voice_id, text: text }),
+      });
 
-      if (existingAudio) {
-        audioBlob = existingAudio;
-        audioUrl = URL.createObjectURL(audioBlob);
-        console.log('Loaded audio from DB');
-      } else {
-        // Generate via Eleven Labs
-        const response = await fetch('/api/elevenlabs/stream', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ voice_id: selectedVoice.voice_id, text: text }),
+      if (!response.ok) throw new Error('Failed to generate audio');
+
+      audioBlob = await response.blob();
+      audioUrl = URL.createObjectURL(audioBlob);
+      console.log('Generated audio via Eleven Labs');
+
+      // Save audio to database (silently in background)
+      saveAudioFile(name, selectedVoice.voice_id, audioBlob, user.id)
+        .catch((error) => {
+          console.error('Failed to save audio to database:', error);
         });
-
-        if (!response.ok) throw new Error('Failed to generate audio');
-
-        audioBlob = await response.blob();
-        audioUrl = URL.createObjectURL(audioBlob);
-        console.log('Generated audio via Eleven Labs');
-
-        // Save audio to database (silently in background)
-        saveAudioFile(name, selectedVoice.voice_id, audioBlob, user.id)
-          .catch((error) => {
-            console.error('Failed to save audio to database:', error);
-          });
-      }
 
       if (audioUrl && audioRef.current) {
         if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {

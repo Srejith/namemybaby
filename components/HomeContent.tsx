@@ -13,6 +13,7 @@ interface HomeContentProps {
   onDeleteName: (bucket: string, id: string) => void;
   onRequestReport: (name: string) => void;
   onVoiceClick?: (name: string) => void;
+  onMoveClick?: (item: NameItem, currentBucket: string) => void;
   onGenerateForBoy: () => void;
   onGenerateForGirl: () => void;
   onGenerateIdeasClick?: () => void;
@@ -32,6 +33,7 @@ export default function HomeContent({
   onDeleteName,
   onRequestReport,
   onVoiceClick,
+  onMoveClick,
   onGenerateForBoy,
   onGenerateForGirl,
   onGenerateIdeasClick,
@@ -68,6 +70,7 @@ export default function HomeContent({
           onGenerateForBoy={onGenerateForBoy}
           onGenerateForGirl={onGenerateForGirl}
           onGenerateIdeasClick={onGenerateIdeasClick}
+          onMoveClick={onMoveClick ? (item) => onMoveClick(item, 'generated') : undefined}
           isGeneratingNames={isGeneratingNames}
           isGeneratingIdeas={isGeneratingIdeas}
           babyGender={babyGender}
@@ -75,7 +78,7 @@ export default function HomeContent({
       )}
 
       {user && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-280px)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 md:h-[calc(100vh-280px)]">
           <NameBucket
             title="Shortlist Names"
             bucketId="shortlist"
@@ -84,6 +87,7 @@ export default function HomeContent({
             onDeleteName={onDeleteName}
             onClick={onRequestReport}
             onVoiceClick={onVoiceClick}
+            onMoveClick={onMoveClick}
             color="green"
           />
           <NameBucket
@@ -94,6 +98,7 @@ export default function HomeContent({
             onDeleteName={onDeleteName}
             onClick={onRequestReport}
             onVoiceClick={onVoiceClick}
+            onMoveClick={onMoveClick}
             color="yellow"
           />
           <NameBucket
@@ -104,6 +109,7 @@ export default function HomeContent({
             onDeleteName={onDeleteName}
             onClick={onRequestReport}
             onVoiceClick={onVoiceClick}
+            onMoveClick={onMoveClick}
             color="red"
           />
         </div>

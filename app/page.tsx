@@ -17,6 +17,7 @@ import VoiceSelectionSidebar from '@/components/VoiceSelectionSidebar';
 import PreferencesPanel from '@/components/PreferencesPanel';
 import PreferencesTab from '@/components/PreferencesTab';
 import OnboardingWizard from '@/components/OnboardingWizard';
+import MoveNameModal from '@/components/MoveNameModal';
 import { NameItem, UserPreferences } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -54,6 +55,9 @@ export default function Home() {
   const [voiceSidebarName, setVoiceSidebarName] = useState<string>('');
   const [preferencesPanelOpen, setPreferencesPanelOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [moveModalOpen, setMoveModalOpen] = useState(false);
+  const [moveModalItem, setMoveModalItem] = useState<NameItem | null>(null);
+  const [moveModalCurrentBucket, setMoveModalCurrentBucket] = useState<string>('');
   const sessionIdRef = useRef<string>(`session-${Date.now()}`);
   const [isGeneratingNames, setIsGeneratingNames] = useState(false);
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
@@ -177,6 +181,72 @@ export default function Home() {
   const handleVoiceClick = (name: string) => {
     setVoiceSidebarName(name);
     setVoiceSidebarOpen(true);
+  };
+
+  // Handle move name click (for mobile)
+  const handleMoveClick = (item: NameItem, currentBucket: string) => {
+    setMoveModalItem(item);
+    setMoveModalCurrentBucket(currentBucket);
+    setMoveModalOpen(true);
+  };
+
+  // Handle move to bucket from modal
+  const handleMoveToBucket = async (item: NameItem, fromBucket: string, toBucket: string) => {
+    // Self-check: Check if name already exists in the target bucket
+    if (isNameInBucket(item.name, toBucket)) {
+      const bucketDisplayName = getBucketDisplayName(toBucket);
+      setErrorMessage(`"${item.name}" already exists in ${bucketDisplayName}. Duplicate names are not allowed.`);
+      setTimeout(() => setErrorMessage(null), 5000);
+      return;
+    }
+
+    try {
+      // If moving from generated names
+      if (fromBucket === 'generated') {
+        const newItem = await moveNameBetweenTables(
+          'generated_list',
+          toBucket as TableName,
+          item.id,
+          item.name,
+          user?.id,
+          item.gender,
+          item.inspiration
+        );
+
+        if (newItem) {
+          // Update UI - remove from generated, add to target bucket
+          setGeneratedNames((prev) => prev.filter((i) => i.id !== item.id));
+          setNames((prev) => ({
+            ...prev,
+            [toBucket]: [...prev[toBucket], newItem],
+          }));
+        }
+      } else {
+        // Move between buckets in database
+        const newItem = await moveNameBetweenTables(
+          fromBucket as TableName,
+          toBucket as TableName,
+          item.id,
+          item.name,
+          user?.id,
+          item.gender,
+          item.inspiration
+        );
+
+        if (newItem) {
+          // Update UI
+          setNames((prev) => ({
+            ...prev,
+            [fromBucket]: prev[fromBucket].filter((i) => i.id !== item.id),
+            [toBucket]: [...prev[toBucket], newItem],
+          }));
+        }
+      }
+    } catch (error) {
+      const bucketDisplayName = getBucketDisplayName(toBucket);
+      setErrorMessage(error instanceof Error ? error.message : `Failed to move name to ${bucketDisplayName}.`);
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
   };
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -763,6 +833,7 @@ export default function Home() {
                 onDeleteName={handleDeleteName}
                 onRequestReport={handleRequestReport}
                 onVoiceClick={handleVoiceClick}
+                onMoveClick={handleMoveClick}
                 onGenerateForBoy={() => callLangFlowForNames('Provide me with name suggestions for my baby boy', 'Boy')}
                 onGenerateForGirl={() => callLangFlowForNames('Provide me with name suggestions for my baby girl', 'Girl')}
                 onGenerateIdeasClick={handleOpenIdeasPanel}
@@ -848,6 +919,23 @@ export default function Home() {
             }}
           />
         )}
+
+        {/* Move Name Modal */}
+        <MoveNameModal
+          isOpen={moveModalOpen}
+          item={moveModalItem}
+          currentBucket={moveModalCurrentBucket}
+          onClose={() => {
+            setMoveModalOpen(false);
+            setMoveModalItem(null);
+            setMoveModalCurrentBucket('');
+          }}
+          onMoveToBucket={(bucketId) => {
+            if (moveModalItem) {
+              handleMoveToBucket(moveModalItem, moveModalCurrentBucket, bucketId);
+            }
+          }}
+        />
 
         {/* Preferences Panel */}
         {preferencesPanelOpen && (

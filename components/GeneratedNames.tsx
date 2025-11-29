@@ -7,9 +7,21 @@ import { NameItem } from '@/types';
 
 interface DraggableNameItemProps {
   item: NameItem;
+  onMoveClick?: (item: NameItem) => void;
 }
 
-function DraggableNameItem({ item }: DraggableNameItemProps) {
+function DraggableNameItem({ item, onMoveClick }: DraggableNameItemProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const {
     attributes,
     listeners,
@@ -40,13 +52,25 @@ function DraggableNameItem({ item }: DraggableNameItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
-      className={`${getGenderStyles()} rounded-lg p-3 border transition-colors cursor-grab active:cursor-grabbing ${
+      {...(isMobile ? {} : attributes)}
+      className={`${getGenderStyles()} w-full md:flex-[1_1_250px] md:min-w-[200px] md:max-w-[250px] rounded-lg p-3 border transition-colors ${!isMobile ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${
         isDragging ? 'opacity-50' : ''
       }`}
+      onClick={(e) => {
+        // On mobile (touch devices), show move options instead of drag
+        if (isMobile && onMoveClick) {
+          e.stopPropagation();
+          e.preventDefault();
+          onMoveClick(item);
+        }
+      }}
     >
-      <span className={`font-medium text-white`}>{item.name}</span>
+      <div {...(isMobile ? {} : listeners)}>
+        <span className={`font-medium text-white`}>{item.name}</span>
+        {item.inspiration && (
+          <div className="text-xs mt-0.5 text-white/80">{item.inspiration}</div>
+        )}
+      </div>
     </div>
   );
 }
@@ -56,12 +80,13 @@ interface GeneratedNamesProps {
   onGenerateForBoy?: () => void;
   onGenerateForGirl?: () => void;
   onGenerateIdeasClick?: () => void;
+  onMoveClick?: (item: NameItem) => void;
   isGeneratingNames?: boolean;
   isGeneratingIdeas?: boolean;
   babyGender?: 'Boy' | 'Girl' | "I don't know yet";
 }
 
-export default function GeneratedNames({ names, onGenerateForBoy, onGenerateForGirl, onGenerateIdeasClick, isGeneratingNames = false, isGeneratingIdeas = false, babyGender }: GeneratedNamesProps) {
+export default function GeneratedNames({ names, onGenerateForBoy, onGenerateForGirl, onGenerateIdeasClick, onMoveClick, isGeneratingNames = false, isGeneratingIdeas = false, babyGender }: GeneratedNamesProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -92,10 +117,10 @@ export default function GeneratedNames({ names, onGenerateForBoy, onGenerateForG
       <p className="text-sm text-gray-600 mb-3">
         Drag names below into one of the buckets to organize them
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
         {names.length > 0 ? (
           names.map((item) => (
-            <DraggableNameItem key={item.id} item={item} />
+            <DraggableNameItem key={item.id} item={item} onMoveClick={onMoveClick} />
           ))
         ) : (
           <div className="text-gray-400 text-sm py-4">

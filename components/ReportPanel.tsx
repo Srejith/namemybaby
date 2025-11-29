@@ -13,9 +13,18 @@ interface ReportPanelProps {
 const markdownToHtml = (markdown: string): string => {
   let html = markdown;
 
-  // Headers
+  // Headers - process from most specific (more #) to least specific (fewer #)
+  // h6
+  html = html.replace(/^###### (.*$)/gim, '<h6 class="text-sm font-bold mt-3 mb-1 text-gray-900">$1</h6>');
+  // h5
+  html = html.replace(/^##### (.*$)/gim, '<h5 class="text-base font-bold mt-3 mb-1.5 text-gray-900">$1</h5>');
+  // h4
+  html = html.replace(/^#### (.*$)/gim, '<h4 class="text-base font-bold mt-3 mb-2 text-gray-900">$1</h4>');
+  // h3
   html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-4 mb-2 text-gray-900">$1</h3>');
+  // h2
   html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-5 mb-3 text-gray-900">$1</h2>');
+  // h1
   html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4 text-gray-900">$1</h1>');
 
   // Bold
@@ -47,14 +56,19 @@ const markdownToHtml = (markdown: string): string => {
   html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-600 mb-4">$1</blockquote>');
 
   // Paragraphs (convert double newlines to paragraphs)
-  html = html.split('\n\n').map(para => {
-    if (!para.trim()) return '';
-    if (para.startsWith('<') && para.endsWith('>')) return para; // Already HTML
-    return `<p class="mb-4 text-gray-700 leading-relaxed">${para.trim()}</p>`;
+  // Split by double newlines
+  const paragraphs = html.split(/\n\n+/);
+  html = paragraphs.map(para => {
+    const trimmed = para.trim();
+    if (!trimmed) return '';
+    
+    // Check if it's already HTML (headers h1-h6, lists, blockquotes, etc.)
+    if (trimmed.match(/^<h[1-6]/) || trimmed.startsWith('<ul') || trimmed.startsWith('<ol') || trimmed.startsWith('<li') || trimmed.startsWith('<blockquote') || trimmed.startsWith('<pre') || trimmed.startsWith('<a href')) {
+      return trimmed;
+    }
+    
+    return `<p class="mb-4 text-gray-700 leading-relaxed">${trimmed}</p>`;
   }).join('');
-
-  // Convert single newlines to <br>
-  html = html.replace(/\n/g, '<br />');
 
   return html;
 };

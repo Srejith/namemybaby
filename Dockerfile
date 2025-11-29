@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.18.0
+ARG NODE_VERSION=24.11.0
 FROM node:${NODE_VERSION}-slim AS base
 
 LABEL fly_launch_runtime="Next.js"
@@ -28,7 +28,17 @@ RUN npm ci --include=dev
 COPY . .
 
 # Build application
-RUN npx next build --experimental-build-mode compile
+RUN --mount=type=secret,id=NEXT_PUBLIC_LANGFLOW_URL \
+    --mount=type=secret,id=NEXT_PUBLIC_LANGFLOW_API_KEY \
+    --mount=type=secret,id=NEXT_PUBLIC_SUPABASE_URL \
+    --mount=type=secret,id=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+    --mount=type=secret,id=ELEVENLABS_API_KEY \
+    NEXT_PUBLIC_LANGFLOW_URL="$(cat /run/secrets/NEXT_PUBLIC_LANGFLOW_URL)" \
+    NEXT_PUBLIC_LANGFLOW_API_KEY="$(cat /run/secrets/NEXT_PUBLIC_LANGFLOW_API_KEY)" \
+    NEXT_PUBLIC_SUPABASE_URL="$(cat /run/secrets/NEXT_PUBLIC_SUPABASE_URL)" \
+    NEXT_PUBLIC_SUPABASE_ANON_KEY="$(cat /run/secrets/NEXT_PUBLIC_SUPABASE_ANON_KEY)" \
+    ELEVENLABS_API_KEY="$(cat /run/secrets/ELEVENLABS_API_KEY)" \
+    npx next build --experimental-build-mode compile
 
 # Remove development dependencies
 RUN npm prune --omit=dev

@@ -20,16 +20,14 @@ The Crux: Where you were born (a place with real names, thank you very much) and
 
 Our AI wizard will churn out names that are beautiful and won't require your kid to spell it out four times before ordering a latte.
 
-2. The Pronunciation Score: The Ultimate Vetting Tool
+2. The Voice Analysis: The Ultimate Vetting Tool
 This is the part where we become your best friend. Forget hoping for the best—we bring the data.
 
 Your Gold Standard: Say the name out loud into your phone. Get that perfect, native-speaker pronunciation recorded. That's the bar.
 
 The Accent Gauntlet: We then make a bunch of digital strangers in your current country (think Generic American #4 or Slightly Grumpy British Guy) try to say the name.
 
-The Sarcastic Verdict: You get a Pronunciation Similarity Score. It’s basically a percentage that tells you: "How close did they come to not totally butchering your kid's name?"
-
-If the score is low, maybe skip that name. We’re saving your kid from a lifetime of correcting people. You're welcome.
+Listen and Compare: Play back both recordings side by side. Hear exactly how your beautiful name gets butchered. Then make an informed decision about whether it's worth the pronunciation battles.
 
 3. Crowd-Source the Stress (The Voting Poll)
 You're a modern parent. You need validation.
