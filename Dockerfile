@@ -26,18 +26,21 @@ RUN npm ci --include=dev
 
 # Copy application code
 COPY . .
-
 # Build application
 RUN --mount=type=secret,id=NEXT_PUBLIC_LANGFLOW_URL \
     --mount=type=secret,id=NEXT_PUBLIC_LANGFLOW_API_KEY \
     --mount=type=secret,id=NEXT_PUBLIC_SUPABASE_URL \
     --mount=type=secret,id=NEXT_PUBLIC_SUPABASE_ANON_KEY \
     --mount=type=secret,id=ELEVENLABS_API_KEY \
+    --mount=type=secret,id=PYTHON_LANGFLOW_URL \
+    --mount=type=secret,id=USE_PYTHON_LANGFLOW \
     NEXT_PUBLIC_LANGFLOW_URL="$(cat /run/secrets/NEXT_PUBLIC_LANGFLOW_URL)" \
     NEXT_PUBLIC_LANGFLOW_API_KEY="$(cat /run/secrets/NEXT_PUBLIC_LANGFLOW_API_KEY)" \
     NEXT_PUBLIC_SUPABASE_URL="$(cat /run/secrets/NEXT_PUBLIC_SUPABASE_URL)" \
     NEXT_PUBLIC_SUPABASE_ANON_KEY="$(cat /run/secrets/NEXT_PUBLIC_SUPABASE_ANON_KEY)" \
     ELEVENLABS_API_KEY="$(cat /run/secrets/ELEVENLABS_API_KEY)" \
+    PYTHON_LANGFLOW_URL="$(cat /run/secrets/PYTHON_LANGFLOW_URL)" \
+    USE_PYTHON_LANGFLOW="$(cat /run/secrets/USE_PYTHON_LANGFLOW)" \
     npx next build --experimental-build-mode compile
 
 # Remove development dependencies
