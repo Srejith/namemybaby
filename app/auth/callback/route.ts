@@ -14,23 +14,34 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  
+  if (!error) {
+    // Get the session to verify it's set
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!error) {
-      const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
-      const isLocalEnv = process.env.NODE_ENV === 'development'
-      if (isLocalEnv) {
-        // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-        return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
-      }
+    const forwardedHost = request.headers.get('x-forwarded-host')
+    const isLocalEnv = process.env.NODE_ENV === 'development'
+    
+    // Create redirect response
+    let redirectUrl = `${origin}${next}`;
+    if (!isLocalEnv && forwardedHost) {
+      redirectUrl = `https://${forwardedHost}${next}`;
     }
+    
+    const response = NextResponse.redirect(redirectUrl);
+    
+    // Set a cookie to indicate successful auth (will be picked up by client)
+    response.cookies.set('auth_redirect', 'success', {
+      httpOnly: false, // Allow client to read
+      maxAge: 10, // Expire after 10 seconds
+      path: '/',
+    });
+    
+    return response;
   }
-
-  // If there's an error or no code, redirect to home with error
-  return NextResponse.redirect(`${origin}/?error=auth_callback_error`);
+  } else {
+    return NextResponse.redirect(`${origin}/?error=auth_callback_error`);
+  }
 }
 

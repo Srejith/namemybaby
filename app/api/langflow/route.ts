@@ -6,23 +6,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { message, sessionId, userId } = body;
 
+    // Check if we should use Python script instead of LangFlow
+    const usePythonScript = process.env.USE_PYTHON_LANGFLOW === 'true';
+    const pythonScriptUrl = process.env.PYTHON_LANGFLOW_URL || 'http://localhost:8000';
+    
     const langflowUrl = process.env.NEXT_PUBLIC_LANGFLOW_URL;
     
-    if (!langflowUrl) {
-      return NextResponse.json(
-        { error: 'LangFlow server URL is not configured. Please set NEXT_PUBLIC_LANGFLOW_URL or LANGFLOW_URL environment variable.' },
-        { status: 500 }
-      );
+    // Determine which service to use
+    let apiUrl: string;
+    if (usePythonScript) {
+      apiUrl = `${pythonScriptUrl}/api/v1/run`;
+    } else {
+      if (!langflowUrl) {
+        return NextResponse.json(
+          { error: 'LangFlow server URL is not configured. Please set NEXT_PUBLIC_LANGFLOW_URL or LANGFLOW_URL environment variable.' },
+          { status: 500 }
+        );
+      }
+      const langflowEndpoint = process.env.LANGFLOW_ENDPOINT || '/api/v1/run';
+      apiUrl = `${langflowUrl}${langflowEndpoint}`;
     }
 
-    // LangFlow API endpoint - adjust based on your LangFlow setup
-    // Common patterns:
-    // - /api/v1/chat for chat endpoints
-    // - /api/v1/run/{flow_id} for flow runs
-    const langflowEndpoint = process.env.LANGFLOW_ENDPOINT;
-    const apiUrl = `${langflowUrl}${langflowEndpoint}`;
-
-    // Prepare the request payload for LangFlow
+    // Prepare the request payload (works for both LangFlow and Python script)
     // Adjust this based on your LangFlow flow configuration
     const payload = {
       message: message,
@@ -38,9 +43,12 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add authorization if needed
-        ...(process.env.LANGFLOW_API_KEY && {
+        // Add authorization if needed (only for LangFlow, not Python script)
+        ...(!usePythonScript && process.env.LANGFLOW_API_KEY && {
           'Authorization': `Bearer ${process.env.LANGFLOW_API_KEY}`,
+        }),
+        ...(process.env.LANGFLOW_API_KEY && !usePythonScript && {
+          'x-api-key': process.env.LANGFLOW_API_KEY,
         }),
       },
       body: JSON.stringify(payload),
@@ -65,7 +73,14 @@ export async function POST(request: NextRequest) {
       // LangFlow typically returns outputs array
       const output = data.outputs[0];
       if (output.outputs && output.outputs.length > 0) {
-        responseText = output.outputs[0].message || output.outputs[0].text || JSON.stringify(output.outputs[0]);
+        const innerOutput = output.outputs[0];
+        if (innerOutput.outputs && innerOutput.outputs.message) {
+          responseText = innerOutput.outputs.message.message || innerOutput.outputs.message;
+        } else if (innerOutput.message) {
+          responseText = innerOutput.message.message || innerOutput.message;
+        } else {
+          responseText = innerOutput.message || innerOutput.text || JSON.stringify(innerOutput);
+        }
       } else if (output.message) {
         responseText = output.message;
       } else if (output.text) {
